@@ -1,2 +1,1 @@
-# Udacity-Data-Engineering
-Projects from Udacity Data Engineering Nanodegree Program
+# Udacity-Data-Engineering-DWH-Redshift
