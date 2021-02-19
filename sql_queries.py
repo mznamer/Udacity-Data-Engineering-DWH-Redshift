@@ -23,40 +23,40 @@ staging_songs_table_create = ("""
         artist_id VARCHAR,
         artist_latitude FLOAT,
         artist_longitude FLOAT,
-        artist_location VARCHAR,
-        artist_name VARCHAR,
+        artist_location VARCHAR(MAX),
+        artist_name VARCHAR(MAX),
         song_id VARCHAR,
-        title VARCHAR,
+        title VARCHAR(MAX),
         duration FLOAT,
         year SMALLINT
      );
     """)
 
 staging_events_table_create = ("""
-    CREATE TABLE staging_events (
-        artist VARCHAR,
+    CREATE TABLE IF NOT EXISTS staging_events (
+        artist VARCHAR(MAX),
         auth VARCHAR,
-        firstName VARCHAR,
+        firstName VARCHAR(MAX),
         gender CHAR(1),
         itemInSession INTEGER,
-        lastName VARCHAR,
+        lastName VARCHAR(MAX),
         length FLOAT,
         level VARCHAR,
-        location VARCHAR,
+        location VARCHAR(MAX),
         method VARCHAR,
         page VARCHAR,
         registration FLOAT,
         sessionId INTEGER,
-        song VARCHAR,
+        song VARCHAR(MAX),
         status INTEGER,
         ts BIGINT,
         userAgent VARCHAR,
-        userId INTEGER 
+        userId INTEGER
     );
 """)
 
 songplay_table_create = ("""
-    CREATE TABLE songplay(
+    CREATE TABLE IF NOT EXISTS songplay(
         songplay_id INTEGER IDENTITY(0,1) PRIMARY KEY,
         start_time TIMESTAMP NOT NULL SORTKEY DISTKEY,
         user_id INTEGER NOT NULL,
@@ -64,7 +64,7 @@ songplay_table_create = ("""
         song_id VARCHAR NOT NULL,
         artist_id VARCHAR NOT NULL,
         session_id INTEGER,
-        location VARCHAR, 
+        location VARCHAR(MAX), 
         user_agent VARCHAR
     );
 """)
@@ -72,7 +72,7 @@ songplay_table_create = ("""
 songs_table_create = ("""
     CREATE TABLE IF NOT EXISTS songs(
         song_id VARCHAR PRIMARY KEY SORTKEY, 
-        title VARCHAR NOT NULL, 
+        title VARCHAR(MAX) NOT NULL, 
         artist_id VARCHAR NOT NULL, 
         year SMALLINT NOT NULL,
         duration FLOAT
@@ -82,8 +82,8 @@ songs_table_create = ("""
 artists_table_create = ("""
     CREATE TABLE IF NOT EXISTS artists(
         artist_id VARCHAR PRIMARY KEY SORTKEY, 
-        name VARCHAR NOT NULL,
-        location VARCHAR, 
+        name VARCHAR(MAX) NOT NULL,
+        location VARCHAR(MAX), 
         latitude FLOAT, 
         longitude FLOAT
     );
@@ -100,7 +100,7 @@ users_table_create = ("""
 """)
 
 time_table_create = ("""
-    CREATE TABLE time(
+    CREATE TABLE IF NOT EXISTS time(
         start_time TIMESTAMP PRIMARY KEY SORTKEY DISTKEY ,
         hour SMALLINT NOT NULL,
         day SMALLINT NOT NULL,
@@ -126,8 +126,8 @@ staging_events_copy = ("""
     FROM '{}'
     CREDENTIALS 'aws_iam_role={}'
     REGION '{}'
-    FORMAT AS JSON 'auto';
-    """).format(config['S3']['LOG_DATA'], config['IAM_ROLE']['IAM_ROLE_ARN'], config['CLUSTER']['REGION'])
+    FORMAT AS JSON '{}';
+    """).format(config['S3']['LOG_DATA'], config['IAM_ROLE']['IAM_ROLE_ARN'], config['CLUSTER']['REGION'], config['S3']['LOG_JSONPATH'])
 
 
 #  ----------------- FINAL TABLES  -----------------
@@ -146,7 +146,7 @@ songplay_table_insert = ("""
             ev.userAgent
     FROM staging_events ev
     JOIN staging_songs s ON (ev.song = s.title AND ev.artist = s.artist_name)
-    WHERE ev.page = 'NextSong';
+    WHERE ev.page = 'NextSong' AND ev.userId IS NOT NULL;
 """)             
                 
 # DIMENSION tables                

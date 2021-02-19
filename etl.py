@@ -24,6 +24,8 @@ def insert_tables(cur, conn):
     for query in insert_table_queries:
         cur.execute(query)
         conn.commit()
+        
+    print("Done with all inserts")
 
 
 def main():

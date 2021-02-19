@@ -18,6 +18,7 @@ def create_tables(cur, conn):
     Function creates all needed tables
     by running queries from create_table_queries list
     """
+    
     for query in create_table_queries:
         cur.execute(query)
         conn.commit()
